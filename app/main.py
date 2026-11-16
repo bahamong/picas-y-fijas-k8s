@@ -182,3 +182,35 @@ def jugar(id_juego: int, datos: JugadorNumero):
                 "juego": ver_juego(juego)
         }
 
+@app.get("/juego/{id_juego}")
+def estado_juego(id_juego: int):
+    with candado:
+        juego = buscar_juego(id_juego)
+        return ver_juego(juego)
+
+@app.get("/juego")
+def listar_juegos(estado: str = None):
+    with candado:
+        lista = []
+        for juego in juegos.values():
+            if estado is not None and juego["estado"] != estado:
+                continue
+            lista.append({
+                "id": juego["id"],
+                "creador": juego["creador"],
+                "estado": juego["estado"],
+                "jugadores": juego["jugadores"],
+                "ganador": juego["ganador"],
+            })
+        return {"total": len(lista),
+                "juegos": lista}
+
+@app.get("/salud")
+def salud():
+    return {"estado": "ok",
+            "pod": socket.gethostname(),
+    }
+@app.get("/")
+def inicio():
+    ruta = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    return FileResponse(ruta)
