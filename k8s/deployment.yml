@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: picas-fijas
+  namespace: unillanos
+  labels:
+    app: picas-fijas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: picas-fijas
+  template:
+    metadata:
+      labels:
+        app: picas-fijas
+    spec:
+      containers:
+        - name: picas-fijas-container
+          image: bahamong/picas-fijas:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /salud
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /salud
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
