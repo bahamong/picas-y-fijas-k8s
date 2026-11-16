@@ -78,3 +78,45 @@ def ver_juego(juego):
 
 def hora_actual():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+@app.post("/login")
+def login(datos: Login):
+    nombre = datos.nombre.strip()
+    if nombre == "":
+        raise HTTPException(status_code=400, detail="El nombre no puede estar vacío.")
+    if len(nombre) > 20:
+        raise HTTPException(status_code=400, detail="El nombre no puede tener más de 20 caracteres.")
+    for c in nombre:
+        if not (c.isalpha() or c == " "):
+            raise HTTPException(status_code=400, detail="El nombre solo puede tener letras y espacios.")
+    with candado:
+        if nombre in jugadores:
+            return {"mensaje": "Bienvenido de nuevo " + nombre, "nombre": nombre}
+        jugadores[nombre] = hora_actual()
+    return {"mensaje": "Jugador " + nombre + " registrado correctamente.",
+            "nombre": nombre
+            }
+
+@app.post("/juego", status_code=201)
+def crear_juego(datos: JugadorNumero):
+    global siguiente_id
+    nombre = validar_jugador(datos.nombre)
+    numero = validar_numero(datos.numero)
+    with candado:
+        id_juego = siguiente_id
+        siguiente_id += 1
+        juegos[id_juego] = {
+            "id": id_juego,
+            "creador": nombre,
+            "estado": POR_INICIAR,
+            "jugadores": [nombre],
+            "numeros": {nombre: numero},
+            "turno": None,
+            "ganador": None,
+            "intentos": [],
+            "creado": hora_actual(),
+        }
+        return {"mensaje": "Juego creado, esperando al otro jugador.",
+                "juego": ver_juego(juegos[id_juego])
+                }
+
