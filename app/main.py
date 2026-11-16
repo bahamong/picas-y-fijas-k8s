@@ -120,3 +120,65 @@ def crear_juego(datos: JugadorNumero):
                 "juego": ver_juego(juegos[id_juego])
                 }
 
+@app.put("/juego/{id_juego}")
+def unirse_juego(id_juego: int, datos: JugadorNumero):
+    nombre = validar_jugador(datos.nombre)
+    numero = validar_numero(datos.numero)
+    with candado:
+        juego = buscar_juego(id_juego)
+        if juego["estado"] != POR_INICIAR:
+            raise HTTPException(status_code=409, detail="El juego ya ha comenzado o ha terminado.")
+        if nombre == juego["creador"]:
+            raise HTTPException(status_code=400, detail="El creador del juego no puede unirse como jugador.")
+        juego["jugadores"].append(nombre)
+        juego["numeros"][nombre] = numero
+        juego["estado"] = EN_JUEGO
+        juego["turno"] = random.choice(juego["jugadores"])
+        return {"mensaje": "El juego ha comenzado, empieza " + juego["turno"],
+                "juego": ver_juego(juego)}
+
+@app.post("/juego{id_juego}/jugar")
+def jugar(id_juego: int, datos: JugadorNumero):
+    nombre = validar_jugador(datos.nombre)
+    with candado:
+        juego = buscar_juego(id_juego)
+        if juego["estado"] == POR_INICIAR:
+            raise HTTPException(status_code=409, detail="El juego aún no ha comenzado, espera a que se una otro jugador.")
+        if juego["estado"] == TERMINADO:
+            raise HTTPException(status_code=409, detail="El juego ya ha terminado.")
+        if nombre not in juego["jugadores"]:
+            raise HTTPException(status_code=403, detail="El jugador '" + nombre + "' no está en este juego.")
+        if juego["turno"] != nombre:
+            raise HTTPException(status_code=409, detail="No es tu turno de jugar, es el turno de " + juego["turno"] + ".")
+
+        intento = validar_numero(datos.numero)
+
+        if juego["jugadores"][0] == nombre:
+            oponente = juego["jugadores"][1]
+        else:
+            oponente = juego["jugadores"][0]
+
+        picas, fijas = calcular_picas_fijas(juego["numeros"][oponente], intento)
+        juego["intentos"].append({
+            "jugador": nombre,
+            "numero": intento,
+            "picas": picas,
+            "fijas": fijas,
+            "hora": hora_actual(),
+        })
+
+        if fijas == 4:
+            juego["estado"] = TERMINADO
+            juego["ganador"] = nombre
+            juego["turno"] = None
+            mensaje = "¡Felicidades " + nombre + "! Has ganado el juego."
+        else:
+            juego["turno"] = oponente
+            mensaje = str(picas) + " picas y " + str(fijas) + " fijas. Ahora es el turno de " + oponente + "."
+
+        return {"mensaje": mensaje,
+                "picas": picas,
+                "fijas": fijas,
+                "juego": ver_juego(juego)
+        }
+
