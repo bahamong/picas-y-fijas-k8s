@@ -1,0 +1,7 @@
+.git
+__pycache__
+*.pyc
+k8s
+pruebas
+venv
+README.md
