@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-app = FastAPI(title="Picas y Fijas distribuid")
+app = FastAPI(title="Picas y Fijas distribuido")
 
 jugadores = {}
 juegos = {}
@@ -16,8 +16,8 @@ siguiente_id = 1
 
 candado = threading.Lock()
 
-POR_INICIAR = "por iniciar"
-EN_JUEGO = "en juego"
+POR_INICIAR = "por_iniciar"
+EN_JUEGO = "en_juego"
 TERMINADO = "terminado"
 
 class Login(BaseModel):
@@ -137,7 +137,7 @@ def unirse_juego(id_juego: int, datos: JugadorNumero):
         return {"mensaje": "El juego ha comenzado, empieza " + juego["turno"],
                 "juego": ver_juego(juego)}
 
-@app.post("/juego{id_juego}/jugar")
+@app.post("/juego/{id_juego}/jugar")
 def jugar(id_juego: int, datos: JugadorNumero):
     nombre = validar_jugador(datos.nombre)
     with candado:

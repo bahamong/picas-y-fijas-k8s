@@ -35,17 +35,17 @@ bash pruebas/pruebas.sh
 ## Docker
 
 ```bash
-docker build -t bahamong/picas-fijas:practica .
-docker run -p 8000:8000 bahamong/picas-fijas:practica
+docker build -t bahamong/picas-fijas:1.1 .
+docker run -p 8000:8000 bahamong/picas-fijas:1.1
 docker login
-docker push bahamong/picas-fijas:practica
+docker push bahamong/picas-fijas:1.1
 ```
 
 ## Kubernetes (Killercoda)
 
 ```bash
-git clone https://github.com/bahamong/picas-y-fijas-practica.git
-cd picas-y-fijas-practica
+git clone https://github.com/bahamong/picas-y-fijas-k8s.git
+cd picas-y-fijas-k8s
 kubectl apply -f k8s/namespace.yml
 kubectl apply -f k8s/deployment.yml
 kubectl apply -f k8s/service.yml
