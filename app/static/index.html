@@ -176,9 +176,14 @@ async function cargarJuego() {
   }
   document.getElementById("tablaIntentos").innerHTML = filas;
   if (j.numeros_secretos) {
-    document.getElementById("secretos").textContent = "Numeros secretos: " + JSON.stringify(j.numeros_secretos);
+    let lista = "";
+    for (const nombre in j.numeros_secretos) {
+      const nombreBonito = nombre.charAt(0).toUpperCase() + nombre.slice(1);
+      lista += "<li>" + limpiar(nombreBonito) + ": " + j.numeros_secretos[nombre] + "</li>";
+    }
+    document.getElementById("secretos").innerHTML = "<p>Números secretos:</p><ul>" + lista + "</ul>";
   } else {
-    document.getElementById("secretos").textContent = "";
+    document.getElementById("secretos").innerHTML = "";
   }
 }
 
