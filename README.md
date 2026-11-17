@@ -49,12 +49,16 @@ cd picas-y-fijas-k8s
 kubectl apply -f k8s/namespace.yml
 kubectl apply -f k8s/deployment.yml
 kubectl apply -f k8s/service.yml
+kubectl rollout status deployment/picas-fijas -n unillanos
 kubectl get all -n unillanos
-kubectl port-forward -n unillanos service/picas-fijas-service --address 0.0.0.0 80:80
+kubectl port-forward -n unillanos service/picas-fijas-service --address 0.0.0.0 80:80 > /tmp/pf.log 2>&1 &
+bash pruebas/pruebas.sh http://localhost
 ```
 
-En otra terminal: `bash pruebas/pruebas.sh http://localhost`.
-En el navegador: menu de Killercoda "Traffic / Ports", puerto 80.
+`rollout status` espera a que el pod este listo. El `&` deja el port-forward en segundo plano
+para seguir usando la misma terminal.
+
+En el navegador: menu de Killercoda "Traffic / Ports" (Ctrl + clic para abrirlo en otra pestana), puerto 80.
 
 ## Por que una sola replica
 
